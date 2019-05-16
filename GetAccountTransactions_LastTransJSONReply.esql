@@ -1,0 +1,21 @@
+
+
+CREATE COMPUTE MODULE GetAccountTransactions_LastTransJSONReply
+	
+	DECLARE LastTransSharedSuccReqCount SHARED DECIMAL 0;
+	
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET Environment.Variables.LastTransSuccRequestCount = CountSuccRequest();
+		
+		SET OutputRoot = InputRoot;
+		
+		RETURN TRUE;
+	END;
+	
+	CREATE FUNCTION CountSuccRequest() RETURNS DECIMAL SharedVariableMutex2 : BEGIN ATOMIC
+		SET	LastTransSharedSuccReqCount = LastTransSharedSuccReqCount + 1;		
+		RETURN LastTransSharedSuccReqCount;
+	END;
+	
+END MODULE;

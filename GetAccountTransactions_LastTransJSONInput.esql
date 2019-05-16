@@ -1,0 +1,34 @@
+
+
+CREATE COMPUTE MODULE GetAccountTransactions_LastTransJSONInput
+	
+	DECLARE LastTransSharedReqCount SHARED DECIMAL 0;
+	
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		SET Environment.Variables.LastTransAllRequestCount = CountRequest();
+		
+		SET OutputRoot = InputRoot;
+		
+		DECLARE extAccountNo    CHARACTER '';
+		DECLARE transActionCode CHARACTER '';
+		
+		SET extAccountNo    = InputLocalEnvironment.HTTP.Input.QueryString.[1];
+		SET transActionCode = InputLocalEnvironment.HTTP.Input.QueryString.[2];
+		
+		SET OutputLocalEnvironment.Destination.HTTP.RequestURL = 'http://172.16.167.223:9080/mobileRestSpringIIBBeta/lastTransaction';
+		SET OutputLocalEnvironment.Destination.HTTP.RequestLine.Method = 'GET';
+		SET OutputLocalEnvironment.Destination.HTTP.QueryString.extAccNo = extAccountNo;
+		SET OutputLocalEnvironment.Destination.HTTP.QueryString.actionCode = transActionCode;
+		
+		
+		RETURN TRUE;
+	END;
+
+	CREATE FUNCTION CountRequest() RETURNS DECIMAL SharedVariableMutex1 : BEGIN ATOMIC
+		SET	LastTransSharedReqCount = LastTransSharedReqCount + 1;		
+		RETURN LastTransSharedReqCount;
+	END;
+		
+END MODULE;

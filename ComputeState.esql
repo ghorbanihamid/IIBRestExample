@@ -1,0 +1,34 @@
+
+
+CREATE COMPUTE MODULE ComputeState
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot = InputRoot;
+		-- Save State the HTTP RequestIdentifier is needed for the async 
+		-- reply path's HTTP Reply node
+		SET Environment.SaveState.requestIdentifier = InputLocalEnvironment.Destination.HTTP.RequestIdentifier;
+		-- For completeness also save method. (Not currently used)
+		SET Environment.SaveState.method = InputLocalEnvironment.HTTP.Input.RequestLine.Method;
+		
+		-- For REST the last section of the Request URI should name the target object this
+		-- action is to be performed on
+		DECLARE targObj CHARACTER;
+		SET targObj = SUBSTRING(InputLocalEnvironment.HTTP.Input.RequestLine.RequestURI After '/');
+		SET targObj = SUBSTRING(targObj After '/');
+
+		DECLARE padding CHARACTER;
+		SET Environment.SaveState.padding = InputLocalEnvironment.HTTP.Input.QueryString.[>];
+
+		-- Sanitize the title in the URL.
+		SET targObj = REPLACE(targObj,'%20',' ');
+		
+		IF targObj = '' OR targObj = NULL THEN
+			SET targObj = '*';
+		END IF;
+		
+		-- For completeness also save target. (Not currently used)
+		SET Environment.SaveState.target = targObj;
+		RETURN TRUE;
+	END;
+		
+END MODULE;

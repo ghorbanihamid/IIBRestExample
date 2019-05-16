@@ -1,0 +1,16 @@
+
+
+CREATE COMPUTE MODULE ComputeJsonReply
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- Copy Message Properties only
+		SET Environment.Variables.AccBlReqSuccCount = Environment.Variables.AccBlReqSuccCount + 1;
+		SET OutputRoot = InputRoot;
+		
+		DECLARE balance CHARACTER InputRoot.JSON.Data.balance;
+
+		RETURN TRUE;
+	END;
+
+	
+END MODULE;

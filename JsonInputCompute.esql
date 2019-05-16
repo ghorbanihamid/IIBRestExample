@@ -1,0 +1,36 @@
+
+
+CREATE COMPUTE MODULE JsonInputCompute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- CALL CopyMessageHeaders();
+		-- CALL CopyEntireMessage();
+		SET Environment.Variables.AccBlReqCount = Environment.Variables.AccBlReqCount + 1;
+		SET OutputRoot = InputRoot;
+		
+		DECLARE extAccountNo CHARACTER '';
+		SET extAccountNo = InputLocalEnvironment.HTTP.Input.QueryString.[>];
+		
+		SET OutputLocalEnvironment.Destination.HTTP.RequestURL = 'http://172.16.167.223:9080/mobileRestSpringIIBBeta/accountBalance';
+		SET OutputLocalEnvironment.Destination.HTTP.RequestLine.Method = 'GET';
+		SET OutputLocalEnvironment.Destination.HTTP.QueryString.extAccNo = extAccountNo;
+		
+				
+		
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;
